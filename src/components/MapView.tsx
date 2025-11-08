@@ -3,7 +3,7 @@ import { LatLngExpression } from 'leaflet';
 import { MarkerData, SafetyPlace } from '../types';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Store, Shield, Camera, Train, Target, Lightbulb, AlertTriangle } from 'lucide-react';
+import { Store, Shield, Camera, Train, Target, Lightbulb, AlertTriangle, Phone, MapPin } from 'lucide-react';
 import { renderToString } from 'react-dom/server';
 import { useEffect } from 'react';
 
@@ -215,66 +215,76 @@ export function MapView({ markers, safetyPlaces, center, radiusCircle, showCurre
         </div>
       ))}
 
-      {safetyPlaces.map((place, index) => (
-        <Marker
-          key={`place-${index}`}
-          position={[place.location.lat, place.location.lng]}
-          icon={createCustomIcon(place.type, place.safety)}
-        >
-          <Popup>
-            <div className="text-sm min-w-[200px]">
-              <p className="font-semibold text-base mb-2">{place.name}</p>
-              <div className="space-y-1">
-                <p className="text-gray-600">
-                  類型: {
-                    place.type === 'store' ? '商店' :
-                    place.type === 'police' ? '警局' :
-                    place.type === 'cctv' ? '監視器' :
-                    place.type === 'metro' ? '捷運站' :
-                    place.type === 'streetlight' ? '路燈' :
-                    place.type === 'robbery_incident' ? '犯罪事件' :
-                    place.type
-                  }
-                </p>
-                <p className="text-gray-600">距離: {place.distance_m}m</p>
-                {place.type === 'robbery_incident' && (
-                  <>
-                    {place.incident_date && (
-                      <p className="text-red-600 font-medium">事件日期: {place.incident_date}</p>
-                    )}
-                    {place.incident_time && (
-                      <p className="text-red-600">事件時間: {place.incident_time}</p>
-                    )}
-                    {place.location_desc && (
-                      <p className="text-gray-600">地點: {place.location_desc}</p>
-                    )}
-                  </>
-                )}
-                {place.open_now !== undefined && (
-                  <p className={`font-medium ${place.open_now ? 'text-green-600' : 'text-red-600'}`}>
-                    {place.open_now ? '✓ 營業中' : '✗ 已打烊'}
-                  </p>
-                )}
+      {safetyPlaces.map((place, index) => {
+        const formatHours = () => {
+          if (!place.hours?.regular || place.hours.regular.length === 0) {
+            return '24小時營業';
+          }
+          const firstSchedule = place.hours.regular[0];
+          return `今天 ${firstSchedule.open}-${firstSchedule.close}`;
+        };
+
+        return (
+          <Marker
+            key={`place-${index}`}
+            position={[place.location.lat, place.location.lng]}
+            icon={createCustomIcon(place.type, place.safety)}
+          >
+            <Popup maxWidth={350} className="custom-popup">
+              <div className="min-w-[280px] p-1">
+                <div className="text-lg font-bold mb-2 text-gray-900">
+                  {place.name}
+                </div>
+
                 {place.phone && place.phone !== '' && (
-                  <p className="text-gray-600">電話: {place.phone}</p>
-                )}
-                {place.signals && place.signals.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {place.signals.map((signal, i) => (
-                      <span
-                        key={i}
-                        className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
-                      >
-                        {signal}
-                      </span>
-                    ))}
+                  <div className="text-sm text-gray-700 mb-1">
+                    {place.phone}
                   </div>
                 )}
+
+                <div className="text-sm text-gray-700 mb-3">
+                  {formatHours()}
+                </div>
+
+                <div className="flex gap-2">
+                  {place.phone && place.phone !== '' && (
+                    <button
+                      onClick={() => window.open(`tel:${place.phone}`, '_blank')}
+                      className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
+                      title="撥打電話"
+                    >
+                      <Phone size={18} className="text-gray-700" />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${place.location.lat},${place.location.lng}`;
+                      window.open(googleMapsUrl, '_blank');
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
+                    title="在地圖中查看"
+                  >
+                    <MapPin size={18} className="text-gray-700" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const searchQuery = encodeURIComponent(place.name);
+                      const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
+                      window.open(googleSearchUrl, '_blank');
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
+                    title="Google 搜尋"
+                  >
+                    <span className="text-gray-700 font-bold text-lg">G</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 }
