@@ -46,6 +46,41 @@ function App() {
     }
   };
 
+  const handleSetLocation = async () => {
+    const input = prompt('請輸入座標 (格式: 25.033, 121.565) 或地址:');
+    if (!input) return;
+
+    const coordPattern = /^(-?\d+\.?\d*)\s*,?\s*(-?\d+\.?\d*)$/;
+    const match = input.trim().match(coordPattern);
+
+    if (match) {
+      const lat = parseFloat(match[1]);
+      const lng = parseFloat(match[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        setMapCenter([lat, lng]);
+      } else {
+        alert('座標超出有效範圍');
+      }
+    } else {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&limit=1`
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          setMapCenter([lat, lng]);
+        } else {
+          alert('找不到該地址，請重新輸入');
+        }
+      } catch (error) {
+        alert('地址查詢失敗，請檢查網路連線');
+        console.error('Geocoding error:', error);
+      }
+    }
+  };
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       <header className="bg-gradient-to-r from-teal-500 to-teal-600 p-4 sm:p-5 flex-shrink-0 shadow-sm">
@@ -135,6 +170,12 @@ function App() {
           className="flex-1 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold py-3 sm:py-4 px-4 rounded-xl transition-all text-sm sm:text-base shadow-md hover:shadow-lg"
         >
           載入資料
+        </button>
+        <button
+          onClick={handleSetLocation}
+          className="flex-1 bg-white border-2 border-teal-500 text-teal-600 hover:bg-teal-50 active:bg-teal-100 font-semibold py-3 sm:py-4 px-4 rounded-xl transition-all text-sm sm:text-base shadow-md hover:shadow-lg"
+        >
+          設定位置
         </button>
         {safetyData && (
           <button
