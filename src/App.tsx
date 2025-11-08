@@ -108,6 +108,13 @@ function App() {
   };
 
   const handleGetCurrentPosition = () => {
+    if ((window as any).flutterObject) {
+      (window as any).flutterObject.postMessage(JSON.stringify({
+        name: 'location',
+        data: null
+      }));
+    }
+
     setShowCurrentPosition(true);
     setTimeout(() => {
       setShowCurrentPosition(false);
