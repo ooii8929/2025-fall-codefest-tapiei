@@ -72,6 +72,21 @@ function App() {
 
   useEffect(() => {
     handleGetCurrentPosition();
+
+    let counter = 0;
+    const interval = setInterval(() => {
+      counter += 10;
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('zh-TW', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      console.log(`update ${counter}s time ${timeStr}`);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // const handleAddMarker = (lat: number, lng: number, radius: number, label: string) => {
