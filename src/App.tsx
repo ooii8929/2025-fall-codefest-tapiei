@@ -187,7 +187,7 @@ function App() {
       <SafetyIndicator data={safetyData} />
 
       <div className="flex-1 flex flex-col overflow-hidden pb-16">
-        <div className="flex-1 p-2 sm:p-3">
+        <div className="flex-1 p-2 sm:p-3 hidden">
           <MapView
             markers={markers}
             safetyPlaces={safetyData?.places || []}
@@ -215,7 +215,7 @@ function App() {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 sm:p-4 flex gap-2 sm:gap-3 z-[900]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 sm:p-4 flex gap-2 sm:gap-3 z-[900] hidden">
         <button
           onClick={() => {
             const jsonInput = document.createElement('textarea');
