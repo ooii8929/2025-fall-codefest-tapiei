@@ -13,6 +13,7 @@ function App() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([25.0330, 121.5654]);
   const [safetyData, setSafetyData] = useState<SafetyAPIResponse | null>(null);
   const [showCurrentPosition, setShowCurrentPosition] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   const handleGetCurrentPosition = () => {
     const handlePositionUpdate = (event: MessageEvent) => {
@@ -22,6 +23,7 @@ function App() {
           const { latitude, longitude } = response.data;
 
           setMapCenter([latitude, longitude]);
+          setShowMap(true);
 
           if (safetyData) {
             setSafetyData({
@@ -160,7 +162,7 @@ function App() {
       <SafetyIndicator data={safetyData} />
 
       <div className="flex-1 flex flex-col overflow-hidden pb-16">
-        <div className="flex-1 p-2 sm:p-3 hidden">
+        <div className={`flex-1 p-2 sm:p-3 ${!showMap ? 'hidden' : ''}`}>
           <MapView
             markers={markers}
             safetyPlaces={safetyData?.places || []}
