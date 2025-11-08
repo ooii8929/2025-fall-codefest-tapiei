@@ -14,20 +14,36 @@ function App() {
   const [safetyData, setSafetyData] = useState<SafetyAPIResponse | null>(null);
   const [showCurrentPosition, setShowCurrentPosition] = useState(false);
 
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+  const handleGetCurrentPosition = () => {
+    const handlePositionUpdate = (event: MessageEvent) => {
       try {
         const response = JSON.parse(event.data);
         if (response.name === 'location' && response.data) {
           const { latitude, longitude } = response.data;
+
           setMapCenter([latitude, longitude]);
+
+          if (safetyData) {
+            setSafetyData({
+              ...safetyData,
+              meta: {
+                ...safetyData.meta,
+                center: {
+                  lat: latitude,
+                  lng: longitude
+                }
+              }
+            });
+          }
+
+          window.removeEventListener('message', handlePositionUpdate);
         }
       } catch (error) {
         console.error('解析位置失敗:', error);
       }
     };
 
-    window.addEventListener('message', handleMessage);
+    window.addEventListener('message', handlePositionUpdate);
 
     if ((window as any).flutterObject) {
       (window as any).flutterObject.postMessage(JSON.stringify({
@@ -36,7 +52,15 @@ function App() {
       }));
     }
 
-    return () => window.removeEventListener('message', handleMessage);
+    setShowCurrentPosition(true);
+    setTimeout(() => {
+      setShowCurrentPosition(false);
+      window.removeEventListener('message', handlePositionUpdate);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    handleGetCurrentPosition();
   }, []);
 
   const handleAddMarker = (lat: number, lng: number, radius: number, label: string) => {
@@ -105,57 +129,6 @@ function App() {
         console.error('Geocoding error:', error);
       }
     }
-  };
-
-  const handleGetCurrentPosition = () => {
-    const handlePositionUpdate = (event: MessageEvent) => {
-      try {
-        const response = JSON.parse(event.data);
-        if (response.name === 'location' && response.data) {
-          const { latitude, longitude } = response.data;
-
-          // 更新地圖中心
-          setMapCenter([latitude, longitude]);
-
-          // 如果有 safetyData，更新 JSON 裡的 center
-          if (safetyData) {
-            setSafetyData({
-              ...safetyData,
-              meta: {
-                ...safetyData.meta,
-                center: {
-                  lat: latitude,
-                  lng: longitude
-                }
-              }
-            });
-          }
-
-          // 移除這個臨時監聽器
-          window.removeEventListener('message', handlePositionUpdate);
-        }
-      } catch (error) {
-        console.error('解析位置失敗:', error);
-      }
-    };
-
-    // 添加臨時監聽器來處理這次的位置更新
-    window.addEventListener('message', handlePositionUpdate);
-
-    // 向 Flutter 請求位置
-    if ((window as any).flutterObject) {
-      (window as any).flutterObject.postMessage(JSON.stringify({
-        name: 'location',
-        data: null
-      }));
-    }
-
-    setShowCurrentPosition(true);
-    setTimeout(() => {
-      setShowCurrentPosition(false);
-      // 如果 5 秒後還沒收到回應，移除監聽器
-      window.removeEventListener('message', handlePositionUpdate);
-    }, 5000);
   };
 
   const handleNotifyFlutter = () => {
