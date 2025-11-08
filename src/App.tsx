@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapView } from './components/MapView';
 import { MarkerForm } from './components/MarkerForm';
 import { MarkerList } from './components/MarkerList';
@@ -12,6 +12,31 @@ function App() {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [mapCenter, setMapCenter] = useState<[number, number]>([25.0330, 121.5654]);
   const [safetyData, setSafetyData] = useState<SafetyAPIResponse | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const response = JSON.parse(event.data);
+        if (response.name === 'location' && response.data) {
+          const { latitude, longitude } = response.data;
+          setMapCenter([latitude, longitude]);
+        }
+      } catch (error) {
+        console.error('解析位置失敗:', error);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    if ((window as any).flutterObject) {
+      (window as any).flutterObject.postMessage(JSON.stringify({
+        name: 'location',
+        data: null
+      }));
+    }
+
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const handleAddMarker = (lat: number, lng: number, radius: number, label: string) => {
     const newMarker: MarkerData = {
