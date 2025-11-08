@@ -102,12 +102,18 @@ function App() {
 
   const handleLoadNewFormatJson = async () => {
     try {
-      const response = await fetch(`/mock/get_nearby_roads_safety?center_lat=25.033964&center_lng=121.564468`);
-
       let data: NewFormatAPIResponse;
 
-      if (!response.ok) {
-        console.warn('API request failed, using mock data');
+      try {
+        const response = await fetch(`/mock/get_nearby_roads_safety?center_lat=25.033964&center_lng=121.564468`);
+
+        if (response.ok) {
+          data = await response.json();
+        } else {
+          throw new Error('API request failed');
+        }
+      } catch (fetchError) {
+        console.warn('API request failed, using mock data', fetchError);
         data = {
           meta: {
             at: "2025-11-08T23:00:00+08:00",
@@ -182,8 +188,6 @@ function App() {
             ]
           }
         };
-      } else {
-        data = await response.json();
       }
 
       const allPlaces: SafetyPlace[] = [
@@ -214,8 +218,7 @@ function App() {
       setSafetyData(convertedData);
       setMapCenter([data.meta.center.lat, data.meta.center.lng]);
     } catch (error) {
-      console.error('Failed to load data:', error);
-      alert('載入資料失敗，請稍後再試');
+      console.error('Unexpected error:', error);
     }
   };
 
