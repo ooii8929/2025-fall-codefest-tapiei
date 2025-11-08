@@ -74,7 +74,7 @@ function App() {
     handleGetCurrentPosition();
 
     let counter = 0;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       counter += 10;
       const now = new Date();
       const timeStr = now.toLocaleTimeString('zh-TW', {
@@ -84,6 +84,16 @@ function App() {
         second: '2-digit'
       });
       console.log(`update ${counter}s time ${timeStr}`);
+
+      try {
+        const data = await loadSafetyData(25.033964, 121.564468);
+        setSafetyData(data);
+        setMapCenter([data.meta.center.lat, data.meta.center.lng]);
+        setShowMap(true);
+        console.log('自動載入安全資料成功');
+      } catch (error) {
+        console.error('自動載入失敗：', error);
+      }
     }, 10000);
 
     return () => clearInterval(interval);
