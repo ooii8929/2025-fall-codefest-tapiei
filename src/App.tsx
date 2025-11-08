@@ -57,7 +57,7 @@ function App() {
 
   const handleLoadJson = (jsonText: string) => {
     try {
-      const data: SafetyAPIResponse = JSON.parse(jsonText);
+      const data: SafetyAPIResponse = JSON.parse(jsonText.trim());
       setSafetyData(data);
       setMapCenter([data.meta.center.lat, data.meta.center.lng]);
     } catch (error) {
