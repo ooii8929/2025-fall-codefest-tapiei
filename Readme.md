@@ -2,6 +2,8 @@
 
 **Your Guardian on the Way Home**
 
+![Demo](demo/init.gif)
+
 ## Overview
 
 In response to increasing concerns about random street attacks, NightKnight is designed to protect citizens' safety through a comprehensive dual-approach system combining passive and active protection mechanisms.
