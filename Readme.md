@@ -196,3 +196,9 @@ flutter run
 ## Team & Hackathon
 
 Developed for the 2025 Taipei Government Codefest Hackathon, NightKnight demonstrates comprehensive full-stack development capabilities, integrating GIS technology, real-time communication, route planning algorithms, and data visualization to create a practical solution for urban safety.
+
+### Team Members
+- cuh02a08@gmail.com
+- leejay3830821@gmail.com
+- bebechen333@gmail.com
+- steward3799@gmail.com
